@@ -73,6 +73,9 @@ func interfaceDesenharJogo(jogo *Jogo) {
 	// Desenha a barra de status
 	interfaceDesenharBarraDeStatus(jogo)
 
+	// Desenha as balas
+	interfaceDesenharBalas(jogo)
+
 	// Força a atualização do terminal
 	interfaceAtualizarTela()
 }
@@ -90,6 +93,14 @@ func interfaceAtualizarTela() {
 // Desenha um elemento na posição (x, y)
 func interfaceDesenharElemento(x, y int, elem Elemento) {
 	termbox.SetCell(x, y, elem.simbolo, elem.cor, elem.corFundo)
+}
+
+func interfaceDesenharBalas(jogo *Jogo) {
+	for _, bala := range jogo.Balas {
+		if bala.Habilitada {
+			termbox.SetCell(bala.X, bala.Y, '*', CorTexto, CorPadrao)
+		}
+	}
 }
 
 // Exibe uma barra de status com informações úteis ao jogador

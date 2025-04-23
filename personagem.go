@@ -7,10 +7,18 @@ import "fmt"
 func personagemMover(tecla rune, jogo *Jogo) {
 	dx, dy := 0, 0
 	switch tecla {
-	case 'w': dy = -1 // Move para cima
-	case 'a': dx = -1 // Move para a esquerda
-	case 's': dy = 1  // Move para baixo
-	case 'd': dx = 1  // Move para a direita
+	case 'w':
+		jogo.Direcao = Cima
+		dy = -1 // Move para cima
+	case 'a':
+		jogo.Direcao = Esquerda
+		dx = -1 // Move para a esquerda
+	case 's':
+		jogo.Direcao = Baixo
+		dy = 1 // Move para baixo
+	case 'd':
+		jogo.Direcao = Direita
+		dx = 1 // Move para a direita
 	}
 
 	nx, ny := jogo.PosX+dx, jogo.PosY+dy
@@ -24,20 +32,21 @@ func personagemMover(tecla rune, jogo *Jogo) {
 // Define o que ocorre quando o jogador pressiona a tecla de interação
 // Neste exemplo, apenas exibe uma mensagem de status
 // Você pode expandir essa função para incluir lógica de interação com objetos
-func personagemInteragir(jogo *Jogo) {
+func personagemInteragir(jogo *Jogo, eventCh chan Evento) {
 	// Atualmente apenas exibe uma mensagem de status
 	jogo.StatusMsg = fmt.Sprintf("Interagindo em (%d, %d)", jogo.PosX, jogo.PosY)
+	go atirarBala(jogo, eventCh)
 }
 
 // Processa o evento do teclado e executa a ação correspondente
-func personagemExecutarAcao(ev EventoTeclado, jogo *Jogo) bool {
+func personagemExecutarAcao(ev EventoTeclado, jogo *Jogo, eventCh chan Evento) bool {
 	switch ev.Tipo {
 	case "sair":
 		// Retorna false para indicar que o jogo deve terminar
 		return false
 	case "interagir":
 		// Executa a ação de interação
-		personagemInteragir(jogo)
+		personagemInteragir(jogo, eventCh)
 	case "mover":
 		// Move o personagem com base na tecla
 		personagemMover(ev.Tecla, jogo)
