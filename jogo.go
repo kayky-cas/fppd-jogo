@@ -35,6 +35,7 @@ type Bala struct {
 
 // Jogo contém o estado atual do jogo
 type Jogo struct {
+	Timer          time.Duration
 	Balas          []Bala
 	Mapa           [][]Elemento // grade 2D representando o mapa
 	PosX, PosY     int          // posição atual do personagem
@@ -54,10 +55,10 @@ var (
 )
 
 // Cria e retorna uma nova instância do jogo
-func jogoNovo() Jogo {
+func jogoNovo(tempo time.Duration) Jogo {
 	// O ultimo elemento visitado é inicializado como vazio
 	// pois o jogo começa com o personagem em uma posição vazia
-	return Jogo{UltimoVisitado: Vazio}
+	return Jogo{UltimoVisitado: Vazio, Timer: tempo}
 }
 
 // Lê um arquivo texto linha por linha e constrói o mapa do jogo
@@ -291,6 +292,23 @@ func moveJogador(jogo *Jogo, eventCh chan Evento) {
 			eventCh <- EventoSair
 		}
 		jogo.Mutex.Unlock()
+		eventCh <- EventoDesenha
+	}
+}
+
+func timer(jogo *Jogo, eventCh chan Evento) {
+	for range time.NewTicker(1 * time.Second).C {
+		jogo.Mutex.Lock()
+		jogo.Timer -= 1 * time.Second
+
+		if jogo.Timer == 0 {
+			eventCh <- EventoDerrota
+			jogo.Mutex.Unlock()
+			return
+		}
+
+		jogo.Mutex.Unlock()
+
 		eventCh <- EventoDesenha
 	}
 }

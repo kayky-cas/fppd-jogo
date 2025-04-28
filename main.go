@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 )
 
 type Evento int
@@ -27,7 +28,7 @@ func main() {
 	}
 
 	// Inicializa o jogo
-	jogo := jogoNovo()
+	jogo := jogoNovo(time.Second * 10)
 	if err := jogoCarregarMapa(mapaFile, &jogo); err != nil {
 		panic(err)
 	}
@@ -39,6 +40,7 @@ func main() {
 
 	go moveJogador(&jogo, eventCh)
 	go prepararInimigos(&jogo, eventCh)
+	go timer(&jogo, eventCh)
 
 	inimigoCont := 0
 

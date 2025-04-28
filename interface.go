@@ -6,6 +6,9 @@
 package main
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/nsf/termbox-go"
 )
 
@@ -76,8 +79,18 @@ func interfaceDesenharJogo(jogo *Jogo) {
 	// Desenha as balas
 	interfaceDesenharBalas(jogo)
 
+	// Desenha as balas
+	interfaceDesenharTimer(jogo)
+
 	// Força a atualização do terminal
 	interfaceAtualizarTela()
+}
+
+func interfaceDesenharTimer(jogo *Jogo) {
+	falta := "Vocêtem " + strconv.Itoa(int(jogo.Timer/time.Second)) + " segundos para finalizar o jogo!"
+	for i, c := range falta {
+		termbox.SetCell(i, len(jogo.Mapa)+2, c, CorTexto, CorPadrao)
+	}
 }
 
 // Limpa a tela do terminal
