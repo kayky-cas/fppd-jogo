@@ -9,6 +9,15 @@ import (
 	"time"
 )
 
+type Direcao int
+
+const (
+	Cima     Direcao = 1
+	Baixo            = 2
+	Esquerda         = 4
+	Direita          = 8
+)
+
 // Elemento representa qualquer objeto do mapa (parede, personagem, vegetação, etc)
 type Elemento struct {
 	simbolo  rune
@@ -146,10 +155,12 @@ func atirarBala(jogo *Jogo, eventCh chan Evento) {
 		if jogo.Mapa[bala.Y][bala.X].tangivel {
 			if jogo.Mapa[bala.Y][bala.X].simbolo == '☠' {
 				jogo.Mapa[bala.Y][bala.X] = Vazio
+				eventCh <- EventoInimigoMorreu
 			}
 
 			bala.Habilitada = false
 			jogo.Mutex.Unlock()
+			eventCh <- EventoDesenha
 			return
 		}
 
@@ -163,6 +174,7 @@ func prepararInimigos(jogo *Jogo, eventCh chan Evento) {
 	for j, linha := range jogo.Mapa {
 		for i, elemento := range linha {
 			if elemento.simbolo == '☠' {
+				eventCh <- EventoInimigoNasceu
 				go seguirPlayer(jogo, i, j, eventCh)
 			}
 		}

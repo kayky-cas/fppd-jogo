@@ -2,16 +2,8 @@
 package main
 
 import (
+	"fmt"
 	"os"
-)
-
-type Direcao int
-
-const (
-	Cima     Direcao = 1
-	Baixo            = 2
-	Esquerda         = 4
-	Direita          = 8
 )
 
 type Evento int
@@ -20,12 +12,13 @@ const (
 	EventoSair Evento = iota
 	EventoDesenha
 	EventoDerrota
+	EventoInimigoNasceu
+	EventoInimigoMorreu
 )
 
 func main() {
 	// Inicializa a interface (termbox)
 	interfaceIniciar()
-	defer interfaceFinalizar()
 
 	// Usa "mapa.txt" como arquivo padrão ou lê o primeiro argumento
 	mapaFile := "mapa.txt"
@@ -45,19 +38,37 @@ func main() {
 	eventCh := make(chan Evento)
 
 	go moveJogador(&jogo, eventCh)
-	prepararInimigos(&jogo, eventCh)
+	go prepararInimigos(&jogo, eventCh)
+
+	inimigoCont := 0
 
 	// Loop principal de entrada
 	for event := range eventCh {
 		switch event {
 		case EventoSair:
+			interfaceFinalizar()
 			return
 		case EventoDesenha:
 			jogo.Mutex.Lock()
 			interfaceDesenharJogo(&jogo)
 			jogo.Mutex.Unlock()
 			break
+		case EventoInimigoNasceu:
+			inimigoCont += 1
+			break
+		case EventoInimigoMorreu:
+			inimigoCont -= 1
+
+			if inimigoCont == 0 {
+				interfaceFinalizar()
+				fmt.Println("Parabéns você ganhou!")
+				return
+			}
+
+			break
 		case EventoDerrota:
+			interfaceFinalizar()
+			fmt.Println("Por favor melhore...")
 			return
 		}
 	}
