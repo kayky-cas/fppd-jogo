@@ -188,8 +188,9 @@ func (s *State) CheckOffline() {
 
 func (s *State) Entrar(args *EntrouArgs, reply *jogo.Jogo) error {
 	jogador := jogo.Jogador{
-		X: 10,
-		Y: 14,
+		X:      10,
+		Y:      14,
+		Online: true,
 	}
 
 	s.jogoLocker.Lock()
@@ -207,6 +208,10 @@ func (s *State) Entrar(args *EntrouArgs, reply *jogo.Jogo) error {
 	evento.ID = len(s.eventosLocker.eventos)
 	s.eventosLocker.eventos = append(s.eventosLocker.eventos, evento)
 	s.eventosLocker.Unlock()
+
+	s.jogadoresStatusLocker.Lock()
+	s.jogadoresStatusLocker.jogadoresStatus = append(s.jogadoresStatusLocker.jogadoresStatus, JogadorStatus{time.Now().Unix(), false})
+	s.jogadoresStatusLocker.Unlock()
 	return nil
 }
 
@@ -257,7 +262,7 @@ func main() {
 	}
 
 	state := State{
-		eventosLocker: EventosLocker{eventos: make([]jogo.Evento, 1024)},
+		eventosLocker: EventosLocker{eventos: make([]jogo.Evento, 0, 1024)},
 		jogoLocker: JogoLocker{
 			jogo: jogo.JogoNovo(),
 		},

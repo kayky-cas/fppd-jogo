@@ -88,7 +88,6 @@ func HandleEvento(j *Jogo, evento *Evento) {
 		HandleMoveJogador(j, id, x, y)
 		break
 	case TipoEventoNovoJogador:
-		log.Print(evento)
 		id := evento.Payload["id"].(int)
 		x := evento.Payload["x"].(int)
 		y := evento.Payload["y"].(int)
@@ -111,7 +110,7 @@ func HandleEvento(j *Jogo, evento *Evento) {
 }
 
 func HandleDesconectaJogador(j *Jogo, id int) {
-	if len(j.Jogadores) > id {
+	if len(j.Jogadores) <= id {
 		return
 	}
 
