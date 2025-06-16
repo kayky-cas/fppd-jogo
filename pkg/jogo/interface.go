@@ -67,9 +67,16 @@ func InterfaceDesenharJogo(jogo *Jogo) {
 		}
 	}
 
+	// Desenha os inimigo sobre o mapa
+	for _, inimigo := range jogo.Inimigos {
+		interfaceDesenharElemento(inimigo.X, inimigo.Y, Inimigo)
+	}
+
 	// Desenha o personagem sobre o mapa
 	for _, jogador := range jogo.Jogadores {
-		interfaceDesenharElemento(jogador.X, jogador.Y, Personagem)
+		if jogador.Online {
+			interfaceDesenharElemento(jogador.X, jogador.Y, Personagem)
+		}
 	}
 
 	// Desenha a barra de status

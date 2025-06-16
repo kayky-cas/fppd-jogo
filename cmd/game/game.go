@@ -35,11 +35,13 @@ func main() {
 	jogo.InterfaceDesenharJogo(&j)
 
 	go func() {
+		var checkArgs jogo.CheckArgs
 		for {
 			select {
 			case <-time.NewTicker(time.Second / 60).C:
 				var eventos []jogo.Evento
-				err := client.Call("State.CheckEventos", &j.UltimoEvento, &eventos)
+				checkArgs = jogo.CheckArgs{ID: j.Jogador().ID, UltimoEvento: j.UltimoEvento}
+				err := client.Call("State.CheckEventos", &checkArgs, &eventos)
 
 				if err != nil {
 					continue
@@ -48,7 +50,6 @@ func main() {
 				if len(eventos) > 0 {
 					j.StatusMsg = fmt.Sprint(eventos)
 					for _, evento := range eventos {
-						j.UltimoEvento = evento.ID
 						jogo.HandleEvento(&j, &evento)
 					}
 					jogo.InterfaceDesenharJogo(&j)
@@ -63,6 +64,5 @@ func main() {
 		if continuar := jogo.PersonagemExecutarAcao(evento, &j); !continuar {
 			break
 		}
-		// jogo.InterfaceDesenharJogo(&j)
 	}
 }

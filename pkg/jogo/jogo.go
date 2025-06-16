@@ -23,6 +23,7 @@ type Jogo struct {
 	Jogadores    []Jogador    `json:"jogadores,omitempty"`
 	UltimoEvento int          `json:"ultimo_evento,omitempty"`
 	rpcClient    *rpc.Client
+	Inimigos     []Vilao
 }
 
 func (j *Jogo) SetRPCClient(client *rpc.Client) {
@@ -47,8 +48,9 @@ func JogoNovo() Jogo {
 	// O ultimo elemento visitado é inicializado como vazio
 	// pois o jogo começa com o personagem em uma posição vazia
 	jogadores := make([]Jogador, 0, 10)
+	inimigos := make([]Vilao, 0, 10)
 
-	return Jogo{Jogadores: jogadores, JogadorID: -1, UltimoEvento: -1}
+	return Jogo{Jogadores: jogadores, JogadorID: -1, UltimoEvento: -1, Inimigos: inimigos}
 }
 
 // Lê um arquivo texto linha por linha e constrói o mapa do jogo
@@ -70,11 +72,16 @@ func JogoCarregarMapa(nome string, jogo *Jogo) error {
 			case Parede.Simbolo:
 				e = Parede
 			case Inimigo.Simbolo:
-				e = Inimigo
+				inimigo := Vilao{
+					len(jogo.Inimigos),
+					len(linhaElems),
+					y,
+					true,
+				}
+				jogo.Inimigos = append(jogo.Inimigos, inimigo)
+				e = Vegetacao
 			case Vegetacao.Simbolo:
 				e = Vegetacao
-				// case Personagem.simbolo:
-				// 	jogo.jogador.PosX, jogo.jogador.PosY = x, y // registra a posição inicial do personagem
 			}
 			linhaElems = append(linhaElems, e)
 		}

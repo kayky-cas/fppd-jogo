@@ -11,3 +11,10 @@ type Jogador struct {
 	Y      int  `json:"y,omitempty"`
 	Online bool `json:"online,omitempty"`
 }
+
+type Vilao struct {
+	ID   int  `json:"id,omitempty"`
+	X    int  `json:"x,omitempty"`
+	Y    int  `json:"y,omitempty"`
+	Vivo bool `json:"vivo,omitempty"`
+}
