@@ -1,25 +1,36 @@
-// jogo.go - Funções para manipular os elementos do jogo, como carregar o mapa e mover o personagem
-package main
+// jo()go.go - Funções para manipular os elementos do jogo, como carregar o mapa e mover o personagem
+package jogo
 
 import (
 	"bufio"
+	"net/rpc"
 	"os"
 )
 
 // Elemento representa qualquer objeto do mapa (parede, personagem, vegetação, etc)
 type Elemento struct {
-	simbolo   rune
-	cor       Cor
-	corFundo  Cor
-	tangivel  bool // Indica se o elemento bloqueia passagem
+	Simbolo  rune `json:"simbolo,omitempty"`
+	Cor      Cor  `json:"cor,omitempty"`
+	CorFundo Cor  `json:"cor_fundo,omitempty"`
+	Tangivel bool `json:"tangivel,omitempty"` // Indica se o elemento bloqueia passagem
 }
 
 // Jogo contém o estado atual do jogo
 type Jogo struct {
-	Mapa            [][]Elemento // grade 2D representando o mapa
-	PosX, PosY      int          // posição atual do personagem
-	UltimoVisitado  Elemento     // elemento que estava na posição do personagem antes de mover
-	StatusMsg       string       // mensagem para a barra de status
+	Mapa         [][]Elemento `json:"mapa,omitempty"`   // grade 2D representando o mapa
+	StatusMsg    string       `json:"status,omitempty"` // mensagem para a barra de status
+	JogadorID    int          `json:"jogador,omitempty"`
+	Jogadores    []Jogador    `json:"jogadores,omitempty"`
+	UltimoEvento int          `json:"ultimo_evento,omitempty"`
+	rpcClient    *rpc.Client
+}
+
+func (j *Jogo) SetRPCClient(client *rpc.Client) {
+	j.rpcClient = client
+}
+
+func (j *Jogo) Jogador() *Jogador {
+	return &j.Jogadores[j.JogadorID]
 }
 
 // Elementos visuais do jogo
@@ -32,14 +43,16 @@ var (
 )
 
 // Cria e retorna uma nova instância do jogo
-func jogoNovo() Jogo {
+func JogoNovo() Jogo {
 	// O ultimo elemento visitado é inicializado como vazio
 	// pois o jogo começa com o personagem em uma posição vazia
-	return Jogo{UltimoVisitado: Vazio}
+	jogadores := make([]Jogador, 0, 10)
+
+	return Jogo{Jogadores: jogadores, JogadorID: -1, UltimoEvento: -1}
 }
 
 // Lê um arquivo texto linha por linha e constrói o mapa do jogo
-func jogoCarregarMapa(nome string, jogo *Jogo) error {
+func JogoCarregarMapa(nome string, jogo *Jogo) error {
 	arq, err := os.Open(nome)
 	if err != nil {
 		return err
@@ -51,17 +64,17 @@ func jogoCarregarMapa(nome string, jogo *Jogo) error {
 	for scanner.Scan() {
 		linha := scanner.Text()
 		var linhaElems []Elemento
-		for x, ch := range linha {
+		for _, ch := range linha {
 			e := Vazio
 			switch ch {
-			case Parede.simbolo:
+			case Parede.Simbolo:
 				e = Parede
-			case Inimigo.simbolo:
+			case Inimigo.Simbolo:
 				e = Inimigo
-			case Vegetacao.simbolo:
+			case Vegetacao.Simbolo:
 				e = Vegetacao
-			case Personagem.simbolo:
-				jogo.PosX, jogo.PosY = x, y // registra a posição inicial do personagem
+				// case Personagem.simbolo:
+				// 	jogo.jogador.PosX, jogo.jogador.PosY = x, y // registra a posição inicial do personagem
 			}
 			linhaElems = append(linhaElems, e)
 		}
@@ -87,7 +100,7 @@ func jogoPodeMoverPara(jogo *Jogo, x, y int) bool {
 	}
 
 	// Verifica se o elemento de destino é tangível (bloqueia passagem)
-	if jogo.Mapa[y][x].tangivel {
+	if jogo.Mapa[y][x].Tangivel {
 		return false
 	}
 
@@ -97,12 +110,8 @@ func jogoPodeMoverPara(jogo *Jogo, x, y int) bool {
 
 // Move um elemento para a nova posição
 func jogoMoverElemento(jogo *Jogo, x, y, dx, dy int) {
-	nx, ny := x+dx, y+dy
+	// nx, ny := x+dx, y+dy
 
-	// Obtem elemento atual na posição
-	elemento := jogo.Mapa[y][x] // guarda o conteúdo atual da posição
-
-	jogo.Mapa[y][x] = jogo.UltimoVisitado     // restaura o conteúdo anterior
-	jogo.UltimoVisitado = jogo.Mapa[ny][nx]   // guarda o conteúdo atual da nova posição
-	jogo.Mapa[ny][nx] = elemento              // move o elemento
+	// jogo.Jogador().X = nx
+	// jogo.Jogador().Y = ny
 }

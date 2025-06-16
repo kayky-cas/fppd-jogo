@@ -1,5 +1,5 @@
 // personagem.go - Funções para movimentação e ações do personagem
-package main
+package jogo
 
 import "fmt"
 
@@ -7,17 +7,22 @@ import "fmt"
 func personagemMover(tecla rune, jogo *Jogo) {
 	dx, dy := 0, 0
 	switch tecla {
-	case 'w': dy = -1 // Move para cima
-	case 'a': dx = -1 // Move para a esquerda
-	case 's': dy = 1  // Move para baixo
-	case 'd': dx = 1  // Move para a direita
+	case 'w':
+		dy = -1 // Move para cima
+	case 'a':
+		dx = -1 // Move para a esquerda
+	case 's':
+		dy = 1 // Move para baixo
+	case 'd':
+		dx = 1 // Move para a direita
 	}
 
-	nx, ny := jogo.PosX+dx, jogo.PosY+dy
+	nx, ny := jogo.Jogador().X+dx, jogo.Jogador().Y+dy
 	// Verifica se o movimento é permitido e realiza a movimentação
 	if jogoPodeMoverPara(jogo, nx, ny) {
-		jogoMoverElemento(jogo, jogo.PosX, jogo.PosY, dx, dy)
-		jogo.PosX, jogo.PosY = nx, ny
+		jogoMoverElemento(jogo, jogo.Jogador().X, jogo.Jogador().Y, dx, dy)
+		//		jogo.Jogador().X, jogo.Jogador().Y = nx, ny
+		EnviarEvento(jogo.rpcClient, NovoMoveJogadorEvento(jogo.Jogador().ID, nx, ny))
 	}
 }
 
@@ -26,11 +31,11 @@ func personagemMover(tecla rune, jogo *Jogo) {
 // Você pode expandir essa função para incluir lógica de interação com objetos
 func personagemInteragir(jogo *Jogo) {
 	// Atualmente apenas exibe uma mensagem de status
-	jogo.StatusMsg = fmt.Sprintf("Interagindo em (%d, %d)", jogo.PosX, jogo.PosY)
+	jogo.StatusMsg = fmt.Sprintf("Interagindo em (%d, %d)", jogo.Jogador().X, jogo.Jogador().Y)
 }
 
 // Processa o evento do teclado e executa a ação correspondente
-func personagemExecutarAcao(ev EventoTeclado, jogo *Jogo) bool {
+func PersonagemExecutarAcao(ev EventoTeclado, jogo *Jogo) bool {
 	switch ev.Tipo {
 	case "sair":
 		// Retorna false para indicar que o jogo deve terminar

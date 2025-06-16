@@ -3,7 +3,7 @@
 // A biblioteca termbox-go é uma biblioteca de interface de terminal que permite desenhar
 // elementos na tela, capturar eventos do teclado e gerenciar a aparência do terminal.
 
-package main
+package jogo
 
 import (
 	"github.com/nsf/termbox-go"
@@ -14,13 +14,13 @@ type Cor = termbox.Attribute
 
 // Definições de cores utilizadas no jogo
 const (
-	CorPadrao     Cor = termbox.ColorDefault
-	CorCinzaEscuro    = termbox.ColorDarkGray
-	CorVermelho       = termbox.ColorRed
-	CorVerde          = termbox.ColorGreen
-	CorParede         = termbox.ColorBlack | termbox.AttrBold | termbox.AttrDim
-	CorFundoParede    = termbox.ColorDarkGray
-	CorTexto          = termbox.ColorDarkGray
+	CorPadrao      Cor = termbox.ColorDefault
+	CorCinzaEscuro     = termbox.ColorDarkGray
+	CorVermelho        = termbox.ColorRed
+	CorVerde           = termbox.ColorGreen
+	CorParede          = termbox.ColorBlack | termbox.AttrBold | termbox.AttrDim
+	CorFundoParede     = termbox.ColorDarkGray
+	CorTexto           = termbox.ColorDarkGray
 )
 
 // EventoTeclado representa uma ação detectada do teclado (como mover, sair ou interagir)
@@ -30,19 +30,19 @@ type EventoTeclado struct {
 }
 
 // Inicializa a interface gráfica usando termbox
-func interfaceIniciar() {
+func InterfaceIniciar() {
 	if err := termbox.Init(); err != nil {
 		panic(err)
 	}
 }
 
 // Encerra o uso da interface termbox
-func interfaceFinalizar() {
+func InterfaceFinalizar() {
 	termbox.Close()
 }
 
 // Lê um evento do teclado e o traduz para um EventoTeclado
-func interfaceLerEventoTeclado() EventoTeclado {
+func InterfaceLerEventoTeclado() EventoTeclado {
 	ev := termbox.PollEvent()
 	if ev.Type != termbox.EventKey {
 		return EventoTeclado{}
@@ -57,7 +57,7 @@ func interfaceLerEventoTeclado() EventoTeclado {
 }
 
 // Renderiza todo o estado atual do jogo na tela
-func interfaceDesenharJogo(jogo *Jogo) {
+func InterfaceDesenharJogo(jogo *Jogo) {
 	interfaceLimparTela()
 
 	// Desenha todos os elementos do mapa
@@ -68,7 +68,9 @@ func interfaceDesenharJogo(jogo *Jogo) {
 	}
 
 	// Desenha o personagem sobre o mapa
-	interfaceDesenharElemento(jogo.PosX, jogo.PosY, Personagem)
+	for _, jogador := range jogo.Jogadores {
+		interfaceDesenharElemento(jogador.X, jogador.Y, Personagem)
+	}
 
 	// Desenha a barra de status
 	interfaceDesenharBarraDeStatus(jogo)
@@ -89,7 +91,7 @@ func interfaceAtualizarTela() {
 
 // Desenha um elemento na posição (x, y)
 func interfaceDesenharElemento(x, y int, elem Elemento) {
-	termbox.SetCell(x, y, elem.simbolo, elem.cor, elem.corFundo)
+	termbox.SetCell(x, y, elem.Simbolo, elem.Cor, elem.CorFundo)
 }
 
 // Exibe uma barra de status com informações úteis ao jogador
@@ -105,4 +107,3 @@ func interfaceDesenharBarraDeStatus(jogo *Jogo) {
 		termbox.SetCell(i, len(jogo.Mapa)+3, c, CorTexto, CorPadrao)
 	}
 }
-
